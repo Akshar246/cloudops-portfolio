@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * LOGIN PAGE (UI + Real API)
+ * REGISTER PAGE (UI + Real API)
  *
  * What this file does:
  * - Collects email/password
- * - Calls POST /api/auth/login
+ * - Calls POST /api/auth/register
  * - On success: redirects to /dashboard
  * - On failure: shows error message
  */
@@ -13,19 +13,19 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleLogin() {
+  async function handleRegister() {
     setError(null);
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -34,12 +34,12 @@ export default function LoginPage() {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setError(data?.message || "Login failed");
+        setError(data?.message || "Registration failed");
         setLoading(false);
         return;
       }
 
-      // Cookie is set by the server. Now we can go to protected area.
+      // Cookie is set by the server. Go to protected area.
       router.push("/dashboard");
     } catch (e) {
       setError("Network error. Please try again.");
@@ -50,9 +50,9 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
       <div className="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-900">Login</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
         <p className="mt-2 text-sm text-gray-600">
-          Login with your account (real backend).
+          Register once, then you can log progress privately.
         </p>
 
         <div className="mt-6 space-y-5">
@@ -73,10 +73,10 @@ export default function LoginPage() {
             <input
               type="password"
               className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-              placeholder="••••••••"
+              placeholder="Minimum 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
+              autoComplete="new-password"
             />
           </div>
 
@@ -86,31 +86,20 @@ export default function LoginPage() {
             </div>
           )}
 
-          <div className="space-y-3">
-  <button
-    onClick={handleLogin}
-    disabled={loading}
-    className="w-full rounded-xl bg-gray-900 px-4 py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60"
-  >
-    {loading ? "Logging in..." : "Login"}
-  </button>
+          <button
+            onClick={handleRegister}
+            disabled={loading}
+            className="w-full rounded-xl bg-gray-900 px-4 py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60"
+          >
+            {loading ? "Creating..." : "Create Account"}
+          </button>
 
-  <button
-    onClick={() => router.push("/register")}
-    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
-  >
-    Create account (Register)
-  </button>
-
-  <button
-    onClick={() => router.push("/")}
-    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
-  >
-    Back to Home
-  </button>
-</div>
-
-          
+          <button
+            onClick={() => router.push("/login")}
+            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            Already have an account? Login
+          </button>
         </div>
       </div>
     </main>

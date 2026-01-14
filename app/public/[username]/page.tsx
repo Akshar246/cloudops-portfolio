@@ -6,11 +6,11 @@
  * What this file does:
  * - Reads username from the URL (/public/:username)
  * - Fetches public entries from GET /api/public/:username
- * - Renders shareable portfolio page
+ * - Renders shareable portfolio page (recruiter view)
  *
  * Why this matters:
- * - This is the “public-facing” view recruiters can see
- * - Only PUBLIC entries show up here
+ * - Recruiters can view your public work without logging in
+ * - Only PUBLIC entries show up (private stays private)
  */
 
 import { useEffect, useState } from "react";
