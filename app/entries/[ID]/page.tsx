@@ -16,6 +16,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
+import ProofUpload from "@/components/proofUpload";
+
 
 type EntryType = "AWS Lab" | "Project" | "DSA" | "Certificate";
 type Visibility = "private" | "public";
@@ -263,6 +265,18 @@ export default function EntryDetailsPage() {
                 />
               </div>
             </div>
+
+            {/* Proof Upload */}
+<div className="pt-2">
+  <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+    <p className="mb-2 text-sm font-medium text-gray-900">Proof Upload</p>
+    <p className="mb-3 text-xs text-gray-600">
+      Upload screenshots or PDFs as proof. Files go to private S3 and link to this entry.
+    </p>
+    <ProofUpload entryId={id} />
+  </div>
+</div>
+
 
             {/* Actions */}
             <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
