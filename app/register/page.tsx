@@ -1,29 +1,50 @@
 "use client";
 
 /**
- * REGISTER PAGE (UI + Real API)
+ * REGISTER PAGE (UI polish only)
  *
- * What this file does:
- * - Collects email/password
  * - Calls POST /api/auth/register
- * - On success: redirects to /dashboard
- * - On failure: shows error message
+ * - On success, redirects to /login
+ *
+ * No backend changes.
  */
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function RegisterPage() {
   const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  async function handleRegister() {
+  async function handleRegister(e: React.FormEvent) {
+    e.preventDefault();
     setError(null);
-    setLoading(true);
+    setSuccess(null);
 
+    if (!email || !password || !confirmPassword) {
+      setError("All fields are required.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -34,73 +55,107 @@ export default function RegisterPage() {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setError(data?.message || "Registration failed");
+        setError(data?.message || "Registration failed.");
         setLoading(false);
         return;
       }
 
-      // Cookie is set by the server. Go to protected area.
-      router.push("/dashboard");
-    } catch (e) {
+      setSuccess("Account created ✅ Redirecting to login…");
+      setTimeout(() => router.push("/login"), 1000);
+    } catch {
       setError("Network error. Please try again.");
+    } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
-      <div className="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Register once, then you can log progress privately.
-        </p>
-
-        <div className="mt-6 space-y-5">
-          <div>
-            <label className="text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-gray-700">Password</label>
-            <input
-              type="password"
-              className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-              placeholder="Minimum 6 characters"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-            />
+    <main className="min-h-[80vh] flex items-center justify-center py-10">
+      <div className="w-full max-w-md">
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-slate-900">
+              Create your account
+            </h1>
+            <p className="mt-1 text-sm text-slate-600">
+              Start building your CloudOps portfolio.
+            </p>
           </div>
 
           {error && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
               {error}
             </div>
           )}
+          {success && (
+            <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+              {success}
+            </div>
+          )}
 
-          <button
-            onClick={handleRegister}
-            disabled={loading}
-            className="w-full rounded-xl bg-gray-900 px-4 py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60"
-          >
-            {loading ? "Creating..." : "Create Account"}
-          </button>
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-slate-700">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+              />
+            </div>
 
-          <button
-            onClick={() => router.push("/login")}
-            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
-          >
-            Already have an account? Login
-          </button>
+            <div>
+              <label className="text-sm font-medium text-slate-700">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 6 characters"
+                className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-slate-700">
+                Confirm password
+              </label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repeat password"
+                className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white shadow-sm hover:bg-slate-800 active:translate-y-[1px] disabled:opacity-60"
+            >
+              {loading ? "Creating account..." : "Create account"}
+            </button>
+          </form>
+
+          <div className="mt-6 flex items-center justify-between text-sm">
+            <Link href="/" className="text-slate-600 hover:text-slate-900">
+              ← Back home
+            </Link>
+            <Link
+              href="/login"
+              className="font-medium text-slate-900 hover:underline"
+            >
+              Already have an account →
+            </Link>
+          </div>
         </div>
+
+        <p className="mt-4 text-center text-xs text-slate-500">
+          Passwords are securely hashed. No sensitive data stored in the browser.
+        </p>
       </div>
     </main>
   );
