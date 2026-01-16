@@ -1,29 +1,53 @@
 "use client";
 
 /**
- * LOGIN PAGE (UI + Real API)
+ * LOGIN PAGE (UI polish only)
  *
- * What this file does:
- * - Collects email/password
- * - Calls POST /api/auth/login
- * - On success: redirects to /dashboard
- * - On failure: shows error message
+ * - Calls POST /api/auth/login (email + password)
+ * - On success, redirects to /dashboard
+ * - If already logged in, redirects to /dashboard
+ *
+ * No backend changes.
  */
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  async function handleLogin() {
+  // If already logged in, go to dashboard
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) router.push("/dashboard");
+      } finally {
+        setChecking(false);
+      }
+    })();
+  }, [router]);
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
     setError(null);
-    setLoading(true);
+    setSuccess(null);
 
+    if (!email || !password) {
+      setError("Email and password are required.");
+      return;
+    }
+
+    setLoading(true);
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
@@ -34,84 +58,98 @@ export default function LoginPage() {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setError(data?.message || "Login failed");
+        setError(data?.message || "Login failed. Please try again.");
         setLoading(false);
         return;
       }
 
-      // Cookie is set by the server. Now we can go to protected area.
+      setSuccess("Login successful ✅ Redirecting...");
       router.push("/dashboard");
-    } catch (e) {
+    } catch {
       setError("Network error. Please try again.");
+    } finally {
       setLoading(false);
     }
   }
 
+  if (checking) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center text-slate-600">
+        Checking session…
+      </div>
+    );
+  }
+
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
-      <div className="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-900">Login</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Login with your account (real backend).
-        </p>
-
-        <div className="mt-6 space-y-5">
-          <div>
-            <label className="text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-gray-700">Password</label>
-            <input
-              type="password"
-              className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-            />
+    <main className="min-h-[80vh] flex items-center justify-center py-10">
+      <div className="w-full max-w-md">
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
+            <p className="mt-1 text-sm text-slate-600">
+              Login to manage your CloudOps portfolio entries.
+            </p>
           </div>
 
           {error && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
               {error}
             </div>
           )}
+          {success && (
+            <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+              {success}
+            </div>
+          )}
 
-          <div className="space-y-3">
-  <button
-    onClick={handleLogin}
-    disabled={loading}
-    className="w-full rounded-xl bg-gray-900 px-4 py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60"
-  >
-    {loading ? "Logging in..." : "Login"}
-  </button>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-slate-700">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+              />
+            </div>
 
-  <button
-    onClick={() => router.push("/register")}
-    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
-  >
-    Create account (Register)
-  </button>
+            <div>
+              <label className="text-sm font-medium text-slate-700">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+              />
+            </div>
 
-  <button
-    onClick={() => router.push("/")}
-    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
-  >
-    Back to Home
-  </button>
-</div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white shadow-sm hover:bg-slate-800 active:translate-y-[1px] disabled:opacity-60"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+          </form>
 
-          
+          <div className="mt-6 flex items-center justify-between text-sm">
+            <Link href="/" className="text-slate-600 hover:text-slate-900">
+              ← Back home
+            </Link>
+            <Link
+              href="/register"
+              className="font-medium text-slate-900 hover:underline"
+            >
+              Create account →
+            </Link>
+          </div>
         </div>
+
+        <p className="mt-4 text-center text-xs text-slate-500">
+          Secure login using httpOnly cookie (JWT) — no token stored in localStorage.
+        </p>
       </div>
     </main>
   );
