@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * DASHBOARD PAGE (UI polish only)
+ * DASHBOARD PAGE (UI polish + Logout)
  *
  * - Lists user entries from GET /api/entries
- * - Clean card layout
- * - Strong visual hierarchy
- * - Recruiter-friendly design
+ * - Create new entry
+ * - Logout button (POST /api/auth/logout)
  */
 
 import Link from "next/link";
@@ -68,6 +67,11 @@ export default function DashboardPage() {
     load();
   }, []);
 
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/login";
+  }
+
   if (loading) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center text-slate-600">
@@ -88,12 +92,21 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <Link
-            href="/entries/new"
-            className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white shadow-sm hover:bg-slate-800 active:translate-y-[1px]"
-          >
-            + Create New Entry
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/entries/new"
+              className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white shadow-sm hover:bg-slate-800 active:translate-y-[1px]"
+            >
+              + Create New Entry
+            </Link>
+
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+            >
+              Logout
+            </button>
+          </div>
         </div>
 
         {error && (
