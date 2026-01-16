@@ -1,5 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
+import User from "@/models/User";
+import { connectDB } from "@/lib/db";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -40,3 +43,26 @@ export function createToken(userId: string) {
 export function verifyToken(token: string) {
   return jwt.verify(token, JWT_SECRET) as { userId: string };
 }
+
+/**
+ * Get logged-in user from httpOnly JWT cookie
+ * Used by protected API routes (like S3 uploads)
+ */
+export async function getUserFromToken() {
+  const cookieStore = await cookies(); // ✅ important
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) return null;
+
+  try {
+    const decoded = verifyToken(token); // { userId }
+
+    await connectDB();
+    const user = await User.findById(decoded.userId).select("-password");
+
+    return user;
+  } catch (error) {
+    return null;
+  }
+}
+

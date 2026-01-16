@@ -5,13 +5,18 @@
  * - Defines the "Entry" schema stored in MongoDB
  * - Each entry belongs to a user (owner)
  * - Supports visibility (private/public) for public profile
- *
- * Why this matters:
- * - Forms the foundation for CRUD (create/read/update/delete)
- * - Enables "only my entries" logic + public profile view
+ * - Stores proof files uploaded to S3 (images / PDFs)
  */
 
 import mongoose, { Schema, models, model } from "mongoose";
+
+export interface IProof {
+  key: string;           // S3 object key
+  contentType: string;   // image/png, application/pdf
+  size: number;          // bytes
+  originalName: string;  // original filename
+  uploadedAt: Date;
+}
 
 export interface IEntry {
   ownerId: mongoose.Types.ObjectId;
@@ -21,6 +26,7 @@ export interface IEntry {
   tags: string[];
   visibility: "private" | "public";
   date: string; // YYYY-MM-DD
+  proofs: IProof[];
 }
 
 const EntrySchema = new Schema<IEntry>(
@@ -38,9 +44,24 @@ const EntrySchema = new Schema<IEntry>(
 
     tags: { type: [String], default: [] },
 
-    visibility: { type: String, enum: ["private", "public"], default: "private" },
+    visibility: {
+      type: String,
+      enum: ["private", "public"],
+      default: "private",
+    },
 
     date: { type: String, required: true },
+
+    // ✅ Proof files stored in S3
+    proofs: [
+      {
+        key: { type: String, required: true },
+        contentType: { type: String, required: true },
+        size: { type: Number, required: true },
+        originalName: { type: String, required: true },
+        uploadedAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );
