@@ -1,15 +1,9 @@
 /**
  * AUTH USER HELPER
- *
- * What this file does:
+ 
  * - Reads JWT token from httpOnly cookie
  * - Verifies token
  * - Returns authenticated userId
- *
- * Why this matters:
- * - Centralized auth logic
- * - Keeps APIs clean and secure
- * - Prevents copy-paste JWT checks everywhere
  */
 
 import { cookies } from "next/headers";

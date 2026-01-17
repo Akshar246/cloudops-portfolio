@@ -1,13 +1,7 @@
 "use client";
 
 /**
- * LOGIN PAGE (UI polish only)
- *
- * - Calls POST /api/auth/login (email + password)
- * - On success, redirects to /dashboard
- * - If already logged in, redirects to /dashboard
- *
- * No backend changes.
+ * LOGIN PAGE
  */
 
 import Link from "next/link";
@@ -25,7 +19,6 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // If already logged in, go to dashboard
   useEffect(() => {
     (async () => {
       try {
@@ -85,9 +78,9 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
+            <h1 className="text-2xl font-bold text-slate-900">Sign in</h1>
             <p className="mt-1 text-sm text-slate-600">
-              Login to manage your CloudOps portfolio entries.
+              Access your dashboard to manage entries and proofs.
             </p>
           </div>
 
@@ -104,7 +97,9 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-slate-700">Email</label>
+              <label className="text-sm font-medium text-slate-700">
+                Email
+              </label>
               <input
                 type="email"
                 value={email}
@@ -115,7 +110,9 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700">Password</label>
+              <label className="text-sm font-medium text-slate-700">
+                Password
+              </label>
               <input
                 type="password"
                 value={password}
@@ -130,7 +127,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white shadow-sm hover:bg-slate-800 active:translate-y-[1px] disabled:opacity-60"
             >
-              {loading ? "Logging in..." : "Login"}
+              {loading ? "Signing in..." : "Sign in"}
             </button>
           </form>
 
@@ -148,7 +145,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-4 text-center text-xs text-slate-500">
-          Secure login using httpOnly cookie (JWT) — no token stored in localStorage.
+          Auth uses an httpOnly JWT cookie (no localStorage token).
         </p>
       </div>
     </main>

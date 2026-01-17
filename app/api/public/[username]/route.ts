@@ -1,14 +1,5 @@
 /**
  * PUBLIC PROFILE API
- *
- * What this file does:
- * - Fetches PUBLIC entries for a given username
- * - Does NOT require authentication
- * - Returns safe, read-only data
- *
- * Why this matters:
- * - Powers shareable portfolio links
- * - Ensures private entries stay private
  */
 
 import { NextResponse } from "next/server";
@@ -16,7 +7,11 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import Entry from "@/models/Entry";
 
-type Ctx = { params: Promise<{ username: string }> };
+type Ctx = {
+  params: Promise<{
+    username: string;
+  }>;
+};
 
 export async function GET(_req: Request, ctx: Ctx) {
   try {
@@ -24,14 +19,26 @@ export async function GET(_req: Request, ctx: Ctx) {
 
     await connectDB();
 
-    // Username strategy: email prefix before "@"
+    /**
+     * Find user by matching email prefix
+     * Example:
+     *   username = "sak2"
+     *   matches: sak2@gmail.com
+     */
     const emailRegex = new RegExp(`^${username}@`, "i");
+
     const user = await User.findOne({ email: emailRegex }).lean();
 
     if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Public profile not found" },
+        { status: 404 }
+      );
     }
 
+    /**
+     * Fetch ONLY public entries for this user
+     */
     const entries = await Entry.find({
       ownerId: user._id,
       visibility: "public",
@@ -41,12 +48,14 @@ export async function GET(_req: Request, ctx: Ctx) {
 
     return NextResponse.json(
       {
-        user: { username },
+        user: {
+          publicId: username,
+        },
         entries,
       },
       { status: 200 }
     );
-  } catch {
+  } catch (error) {
     return NextResponse.json(
       { message: "Failed to load public profile" },
       { status: 500 }

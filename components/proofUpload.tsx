@@ -32,7 +32,10 @@ export default function ProofUpload({ entryId }: Props) {
         throw new Error(presignData?.message || "Presign failed");
       }
 
-      const { uploadUrl, key } = presignData as { uploadUrl: string; key: string };
+      const { uploadUrl, key } = presignData as {
+        uploadUrl: string;
+        key: string;
+      };
 
       // 2) Upload to S3
       const putRes = await fetch(uploadUrl, {
@@ -72,7 +75,9 @@ export default function ProofUpload({ entryId }: Props) {
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium">Upload proof (image/PDF)</label>
+      <label className="block text-sm font-medium">
+        Upload proof (image/PDF)
+      </label>
 
       <input
         type="file"

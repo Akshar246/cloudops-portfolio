@@ -1,23 +1,27 @@
-/**
- * ENTRY DETAILS API (Owner-only)
- *
- * What this file does:
- * - GET: fetch one entry by id (only if owned by logged-in user)
- * - PUT: update one entry by id (only if owned by logged-in user)
- * - DELETE: delete one entry by id (only if owned by logged-in user)
- *
- * Why this matters:
- * - Enables real Edit/Delete in your UI
- * - Prevents users from editing others' data
- */
-
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import Entry from "@/models/Entry";
 import { getAuthUserId } from "@/lib/getAuthUser";
-import mongoose from "mongoose";
 
 type Ctx = { params: Promise<{ id: string }> };
+
+function normalizeTags(tags: unknown): string[] {
+  if (Array.isArray(tags)) {
+    return tags
+      .map((t) => String(t).trim())
+      .filter(Boolean)
+      .slice(0, 25);
+  }
+  if (typeof tags === "string") {
+    return tags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean)
+      .slice(0, 25);
+  }
+  return [];
+}
 
 export async function GET(_req: Request, ctx: Ctx) {
   try {
@@ -25,13 +29,15 @@ export async function GET(_req: Request, ctx: Ctx) {
     const { id } = await ctx.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: "Invalid entry id" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid entry id" },
+        { status: 400 }
+      );
     }
 
     await connectDB();
 
     const entry = await Entry.findOne({ _id: id, ownerId: userId }).lean();
-
     if (!entry) {
       return NextResponse.json({ message: "Entry not found" }, { status: 404 });
     }
@@ -50,11 +56,19 @@ export async function PUT(req: Request, ctx: Ctx) {
     const { id } = await ctx.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: "Invalid entry id" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid entry id" },
+        { status: 400 }
+      );
     }
 
-    const body = await req.json();
-    const { type, title, description, tags, visibility, date } = body;
+    const body = await req.json().catch(() => ({}));
+    const type = String(body.type || "").trim();
+    const title = String(body.title || "").trim();
+    const description = String(body.description || "").trim();
+    const date = String(body.date || "").trim();
+    const visibility = body.visibility === "public" ? "public" : "private";
+    const tags = normalizeTags(body.tags);
 
     if (!type || !title || !description || !date) {
       return NextResponse.json(
@@ -66,20 +80,9 @@ export async function PUT(req: Request, ctx: Ctx) {
     await connectDB();
 
     const updated = await Entry.findOneAndUpdate(
-      { _id: id, ownerId: userId },
-      {
-        type,
-        title,
-        description,
-        tags: Array.isArray(tags)
-          ? tags
-          : typeof tags === "string"
-          ? tags.split(",").map((t: string) => t.trim()).filter(Boolean)
-          : [],
-        visibility: visibility === "public" ? "public" : "private",
-        date,
-      },
-      { new: true }
+      { _id: id, ownerId: userId }, // owner-only
+      { type, title, description, tags, visibility, date },
+      { new: true, runValidators: true }
     ).lean();
 
     if (!updated) {
@@ -100,13 +103,15 @@ export async function DELETE(_req: Request, ctx: Ctx) {
     const { id } = await ctx.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: "Invalid entry id" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid entry id" },
+        { status: 400 }
+      );
     }
 
     await connectDB();
 
     const deleted = await Entry.findOneAndDelete({ _id: id, ownerId: userId });
-
     if (!deleted) {
       return NextResponse.json({ message: "Entry not found" }, { status: 404 });
     }

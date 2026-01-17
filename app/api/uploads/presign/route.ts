@@ -5,7 +5,7 @@ import { s3, S3_BUCKET } from "@/lib/s3";
 import { getUserFromToken } from "@/lib/auth";
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
-const MAX_PDF_BYTES = 25 * 1024 * 1024;   // 25MB
+const MAX_PDF_BYTES = 25 * 1024 * 1024; // 25MB
 
 function sanitizeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -13,7 +13,7 @@ function sanitizeFileName(name: string) {
 
 export async function POST(req: Request) {
   try {
-    // ✅ Uses your Week-2 auth helper that reads the httpOnly "token" cookie
+    // Uses your Week-2 auth helper that reads the httpOnly "token" cookie
     const user = await getUserFromToken();
     if (!user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -71,6 +71,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ uploadUrl, key }, { status: 200 });
   } catch (error: any) {
     console.error("Presign error:", error);
-    return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }

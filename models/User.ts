@@ -30,8 +30,6 @@ const User = models.User || model<IUser>("User", UserSchema);
 
 export default User;
 
-
-
 // What this does (quick mental model)
 
 // Stores email + hashed password

@@ -2,15 +2,6 @@
 
 /**
  * PUBLIC PROFILE PAGE (Real data)
- *
- * What this file does:
- * - Reads username from the URL (/public/:username)
- * - Fetches public entries from GET /api/public/:username
- * - Renders shareable portfolio page
- *
- * Why this matters:
- * - This is the “public-facing” view recruiters can see
- * - Only PUBLIC entries show up here
  */
 
 import { useEffect, useState } from "react";
@@ -97,8 +88,8 @@ export default function PublicProfilePage() {
             CloudOps Portfolio Hub
           </h2>
           <p className="mt-2 text-gray-700">
-            This page is auto-generated from my dashboard. It highlights real work and
-            proof-driven progress.
+            This page is auto-generated from my dashboard. It highlights real
+            work and proof-driven progress.
           </p>
         </div>
 
@@ -114,8 +105,9 @@ export default function PublicProfilePage() {
             </div>
           ) : entries.length === 0 ? (
             <div className="rounded-3xl border border-gray-200 bg-white p-8 text-gray-700 shadow-sm">
-              No public entries yet. Make an entry <span className="font-medium">public</span>{" "}
-              from the Edit Entry page.
+              No public entries yet. Make an entry{" "}
+              <span className="font-medium">public</span> from the Edit Entry
+              page.
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">

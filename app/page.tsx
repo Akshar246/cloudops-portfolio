@@ -9,12 +9,13 @@ export default function Home() {
           <div className="text-xl font-semibold text-gray-900">
             CloudOps Portfolio Hub
           </div>
+
           <div className="flex gap-3">
             <Link
               className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              href="/public/akshar"
+              href="/public/sak246203"
             >
-              View Public Profile
+              Public Profile
             </Link>
             <Link
               className="rounded-xl bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
@@ -30,35 +31,38 @@ export default function Home() {
           {/* Left */}
           <div>
             <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-              Track, prove, and present your AWS + DSA progress like a real engineer.
+              Proof-driven portfolio for AWS + Projects + DSA.
             </h1>
-            <p className="mt-4 text-gray-700 leading-relaxed">
-              This isn’t a static portfolio. It’s a private dashboard where you log work
-              (AWS labs, projects, DSA), attach proofs (later via S3), and publish a clean
-              public profile.
+
+            <p className="mt-4 leading-relaxed text-gray-700">
+              This is not a static portfolio. It’s a personal dashboard where I
+              log work (AWS labs, projects, DSA), attach proofs (S3), and
+              publish selected entries to a clean public profile.
             </p>
 
-            <div className="mt-6 flex gap-3">
+            {/* ✅ Updated CTAs (no Demo Login) */}
+            <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 className="rounded-xl bg-gray-900 px-5 py-3 text-sm text-white hover:bg-gray-800"
-                href="/dashboard"
+                href="/public/sak246203"
               >
-                Open Demo Dashboard
+                View Public Profile
               </Link>
+
               <Link
                 className="rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm text-gray-700 hover:bg-gray-100"
                 href="/login"
               >
-                Try Demo Login
+                Login to Dashboard
               </Link>
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2 text-xs text-gray-700">
               {[
-                "JWT Auth (Week 1)",
-                "Private S3 proofs (Week 2)",
-                "IAM least privilege (Week 3)",
-                "CloudWatch logs",
+                "JWT Auth",
+                "MongoDB + Mongoose",
+                "S3 Proof Uploads",
+                "Public/Private Entries",
               ].map((t) => (
                 <span
                   key={t}
@@ -73,10 +77,11 @@ export default function Home() {
           {/* Right Card */}
           <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="text-sm font-semibold text-gray-900">
-              How it feels
+              What recruiters will see
             </div>
             <p className="mt-2 text-sm text-gray-700">
-              Like a mini internal tool (Jira/GitHub style) — not a brochure.
+              A public profile with real entries marked as{" "}
+              <span className="font-medium">public</span>, including proofs.
             </p>
 
             <div className="mt-5 grid gap-3">
@@ -102,26 +107,26 @@ export default function Home() {
                   className="rounded-2xl border border-gray-200 bg-gray-50 p-4"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="font-medium text-gray-900">
-                      {x.title}
-                    </div>
+                    <div className="font-medium text-gray-900">{x.title}</div>
                     <span className="rounded-full bg-gray-200 px-3 py-1 text-xs text-gray-700">
                       {x.type}
                     </span>
                   </div>
-                  <div className="mt-2 text-xs text-gray-600">
-                    {x.date}
-                  </div>
+                  <div className="mt-2 text-xs text-gray-600">{x.date}</div>
                 </div>
               ))}
             </div>
+
+            <div className="mt-5">
+              <Link
+                href="/public/sak246203"
+                className="text-sm font-medium text-gray-900 hover:underline"
+              >
+                Open Public Profile →
+              </Link>
+            </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <footer className="mt-20 border-t border-gray-200 pt-8 text-sm text-gray-600">
-          Demo UI only (no backend). We’ll connect real auth + DB + S3 next.
-        </footer>
       </div>
     </main>
   );

@@ -21,10 +21,7 @@ export async function hashPassword(password: string) {
 /**
  * Compare plain password with hashed password
  */
-export async function verifyPassword(
-  password: string,
-  hashedPassword: string
-) {
+export async function verifyPassword(password: string, hashedPassword: string) {
   return bcrypt.compare(password, hashedPassword);
 }
 
@@ -65,4 +62,3 @@ export async function getUserFromToken() {
     return null;
   }
 }
-

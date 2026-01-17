@@ -2,14 +2,6 @@
 
 /**
  * NEW ENTRY PAGE (Real POST)
- *
- * What this file does:
- * - Collects entry fields
- * - Calls POST /api/entries
- * - On success redirects to /dashboard
- *
- * Why this matters:
- * - First real “Create” in CRUD
  */
 
 import { useState } from "react";
@@ -156,7 +148,9 @@ export default function NewEntryPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">Date</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Date
+                </label>
                 <input
                   value={date}
                   onChange={(e) => setDate(e.target.value)}

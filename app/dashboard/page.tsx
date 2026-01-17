@@ -1,15 +1,7 @@
 "use client";
 
-/**
- * DASHBOARD PAGE (UI polish + Logout)
- *
- * - Lists user entries from GET /api/entries
- * - Create new entry
- * - Logout button (POST /api/auth/logout)
- */
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type EntryType = "AWS Lab" | "Project" | "DSA" | "Certificate";
 type Visibility = "private" | "public";
@@ -39,24 +31,55 @@ function typeBadge(type: EntryType) {
   }
 }
 
+function statCard(label: string, value: number) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="text-xs text-slate-500">{label}</div>
+      <div className="mt-1 text-2xl font-bold text-slate-900">{value}</div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/entries");
-        const data = await res.json().catch(() => ({}));
+  // Derived from /api/auth/me
+  const [publicHandle, setPublicHandle] = useState<string | null>(null);
 
-        if (!res.ok) {
-          setError(data?.message || "Failed to load entries");
+  // UI controls
+  const [visibilityFilter, setVisibilityFilter] = useState<"all" | Visibility>(
+    "all"
+  );
+  const [q, setQ] = useState("");
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        // 1) Load entries
+        const entriesRes = await fetch("/api/entries", { cache: "no-store" });
+        const entriesData = await entriesRes.json().catch(() => ({}));
+
+        if (!entriesRes.ok) {
+          setError(entriesData?.message || "Failed to load entries");
           setLoading(false);
           return;
         }
 
-        setEntries(data.entries || []);
+        setEntries(entriesData.entries || []);
+
+        // 2) Load user (for public handle)
+        const meRes = await fetch("/api/auth/me", {
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (meRes.ok) {
+          const meData = await meRes.json().catch(() => ({}));
+          const email: string | undefined = meData?.user?.email;
+          if (email) setPublicHandle(email.split("@")[0]);
+        }
       } catch {
         setError("Network error. Please refresh.");
       } finally {
@@ -64,7 +87,7 @@ export default function DashboardPage() {
       }
     }
 
-    load();
+    loadData();
   }, []);
 
   async function handleLogout() {
@@ -72,41 +95,179 @@ export default function DashboardPage() {
     window.location.href = "/login";
   }
 
+  const stats = useMemo(() => {
+    const total = entries.length;
+    const pub = entries.filter((e) => e.visibility === "public").length;
+    const pri = entries.filter((e) => e.visibility === "private").length;
+    const aws = entries.filter((e) => e.type === "AWS Lab").length;
+    const proj = entries.filter((e) => e.type === "Project").length;
+    const dsa = entries.filter((e) => e.type === "DSA").length;
+    const cert = entries.filter((e) => e.type === "Certificate").length;
+
+    return { total, pub, pri, aws, proj, dsa, cert };
+  }, [entries]);
+
+  const filtered = useMemo(() => {
+    const qq = q.trim().toLowerCase();
+    return entries.filter((e) => {
+      const vOk =
+        visibilityFilter === "all" ? true : e.visibility === visibilityFilter;
+
+      if (!qq) return vOk;
+
+      const text = `${e.title} ${e.description} ${(e.tags || []).join(
+        " "
+      )}`.toLowerCase();
+      return vOk && text.includes(qq);
+    });
+  }, [entries, visibilityFilter, q]);
+
   if (loading) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center text-slate-600">
-        Loading your entries…
+        Loading dashboard…
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen py-10">
+    <main className="min-h-screen bg-slate-50 px-6 py-10">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
+            <h1 className="text-3xl font-bold text-slate-900">
+              Portfolio Dashboard
+            </h1>
             <p className="mt-1 text-sm text-slate-600">
-              Manage your CloudOps learning, projects, and certifications.
+              Create entries, attach proofs, and publish selected work to your
+              public profile.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap gap-3">
             <Link
               href="/entries/new"
-              className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white shadow-sm hover:bg-slate-800 active:translate-y-[1px]"
+              className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white hover:bg-slate-800"
             >
-              + Create New Entry
+              + New Entry
             </Link>
+
+            {publicHandle && (
+              <Link
+                href={`/public/${publicHandle}`}
+                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+              >
+                Public Profile
+              </Link>
+            )}
 
             <button
               onClick={handleLogout}
-              className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+              className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
             >
               Logout
             </button>
           </div>
+        </div>
+
+        {/* Stats */}
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {statCard("Total entries", stats.total)}
+          {statCard("Public entries", stats.pub)}
+          {statCard("Private entries", stats.pri)}
+          {statCard(
+            "AWS / Projects / DSA / Certs",
+            stats.aws + stats.proj + stats.dsa + stats.cert
+          )}
+        </div>
+
+        {/* Public Profile Box */}
+        {publicHandle && (
+          <div className="mb-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="text-sm font-semibold text-slate-900">
+                  Shareable public profile
+                </div>
+                <div className="mt-1 break-all text-sm text-slate-600">
+                  {`${window.location.origin}/public/${publicHandle}`}
+                </div>
+                <div className="mt-2 text-xs text-slate-500">
+                  Recruiters should use this link. Only entries marked{" "}
+                  <span className="font-medium">public</span> will appear.
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() =>
+                    navigator.clipboard.writeText(
+                      `${window.location.origin}/public/${publicHandle}`
+                    )
+                  }
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                >
+                  Copy link
+                </button>
+                <Link
+                  href={`/public/${publicHandle}`}
+                  className="rounded-xl bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800"
+                >
+                  Open
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Controls */}
+        <div className="mb-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-wrap gap-2">
+              {(["all", "public", "private"] as const).map((v) => {
+                const active = visibilityFilter === v;
+                return (
+                  <button
+                    key={v}
+                    onClick={() => setVisibilityFilter(v)}
+                    className={
+                      "rounded-full border px-4 py-2 text-sm " +
+                      (active
+                        ? "border-slate-900 bg-slate-900 text-white"
+                        : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50")
+                    }
+                  >
+                    {v === "all"
+                      ? "All"
+                      : v === "public"
+                      ? "Public"
+                      : "Private"}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex gap-2">
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search entries…"
+                className="w-full md:w-80 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+              />
+              <button
+                onClick={() => setQ("")}
+                className="rounded-2xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs text-slate-500">
+            Showing <span className="font-medium">{filtered.length}</span>{" "}
+            result(s).
+          </p>
         </div>
 
         {error && (
@@ -115,66 +276,67 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {entries.length === 0 ? (
+        {/* Entries */}
+        {filtered.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
-            <p className="text-slate-600">No entries yet.</p>
-            <Link
-              href="/entries/new"
-              className="mt-4 inline-block rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white hover:bg-slate-800"
-            >
-              Create your first entry
-            </Link>
+            <p className="text-slate-900 font-medium">No entries found.</p>
+            <p className="mt-2 text-sm text-slate-600">
+              Create your first entry, then mark it{" "}
+              <span className="font-medium">public</span> to show it on your
+              public profile.
+            </p>
+            <div className="mt-5">
+              <Link
+                href="/entries/new"
+                className="inline-flex rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white hover:bg-slate-800"
+              >
+                + Create Entry
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {entries.map((entry) => (
+            {filtered.map((e) => (
               <div
-                key={entry._id}
-                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                key={e._id}
+                className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
               >
                 <div className="mb-3 flex items-center justify-between">
                   <span
-                    className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${typeBadge(
-                      entry.type
+                    className={`rounded-full border px-3 py-1 text-xs font-medium ${typeBadge(
+                      e.type
                     )}`}
                   >
-                    {entry.type}
+                    {e.type}
                   </span>
 
-                  <span className="text-xs text-slate-500">
-                    {entry.visibility}
+                  <span
+                    className={
+                      "rounded-full border px-3 py-1 text-xs " +
+                      (e.visibility === "public"
+                        ? "border-green-200 bg-green-50 text-green-700"
+                        : "border-amber-200 bg-amber-50 text-amber-700")
+                    }
+                  >
+                    {e.visibility}
                   </span>
                 </div>
 
-                <h3 className="mb-2 line-clamp-2 text-lg font-semibold text-slate-900">
-                  {entry.title}
+                <h3 className="text-lg font-semibold text-slate-900">
+                  {e.title}
                 </h3>
 
-                <p className="mb-4 line-clamp-3 text-sm text-slate-600">
-                  {entry.description}
+                <p className="mt-2 text-sm text-slate-600 line-clamp-3">
+                  {e.description}
                 </p>
 
-                {entry.tags?.length > 0 && (
-                  <div className="mb-4 flex flex-wrap gap-2">
-                    {entry.tags.map((tag, i) => (
-                      <span
-                        key={i}
-                        className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-700"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <div className="mt-auto flex items-center justify-between pt-2">
-                  <span className="text-xs text-slate-500">{entry.date}</span>
-
+                <div className="mt-4 flex justify-between text-xs text-slate-500">
+                  <span>{String(e.date).slice(0, 10)}</span>
                   <Link
-                    href={`/entries/${entry._id}`}
-                    className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm hover:bg-slate-50"
+                    href={`/entries/${e._id}`}
+                    className="text-slate-700 hover:underline"
                   >
-                    View / Edit →
+                    Open →
                   </Link>
                 </div>
               </div>

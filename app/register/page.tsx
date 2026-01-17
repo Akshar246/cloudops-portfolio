@@ -2,10 +2,6 @@
 
 /**
  * REGISTER PAGE (UI polish only)
- *
- * - Calls POST /api/auth/register
- * - On success, redirects to /login
- *
  * No backend changes.
  */
 
@@ -95,7 +91,9 @@ export default function RegisterPage() {
 
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-slate-700">Email</label>
+              <label className="text-sm font-medium text-slate-700">
+                Email
+              </label>
               <input
                 type="email"
                 value={email}
@@ -154,7 +152,8 @@ export default function RegisterPage() {
         </div>
 
         <p className="mt-4 text-center text-xs text-slate-500">
-          Passwords are securely hashed. No sensitive data stored in the browser.
+          Passwords are securely hashed. No sensitive data stored in the
+          browser.
         </p>
       </div>
     </main>

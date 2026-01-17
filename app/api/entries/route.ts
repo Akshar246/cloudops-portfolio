@@ -1,13 +1,5 @@
 /**
  * ENTRIES API (Private)
- *
- * What this file does:
- * - GET: returns entries owned by the logged-in user
- * - POST: creates a new entry for the logged-in user
- *
- * Security:
- * - Uses JWT from httpOnly cookie
- * - Ensures user can only access their own entries
  */
 
 import { NextResponse } from "next/server";
@@ -56,7 +48,10 @@ export async function POST(req: Request) {
       tags: Array.isArray(tags)
         ? tags
         : typeof tags === "string"
-        ? tags.split(",").map((t) => t.trim()).filter(Boolean)
+        ? tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean)
         : [],
       visibility: visibility === "public" ? "public" : "private",
       date,
