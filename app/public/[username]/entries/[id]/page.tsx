@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 
 type EntryType = "AWS Lab" | "Project" | "DSA" | "Certificate";
 
@@ -28,10 +29,15 @@ export default async function PublicEntryDetailsPage({
 }) {
   const { username, id } = await params;
 
-  const res = await fetch(
-    `http://localhost:3000/api/public/${username}/entries/${id}`,
-    { cache: "no-store" }
-  );
+  // ✅ Build absolute base URL for Server Component fetch()
+  const h = await headers();
+  const host = h.get("host");
+  const proto = h.get("x-forwarded-proto") ?? "http";
+  const base = `${proto}://${host}`;
+
+  const res = await fetch(`${base}/api/public/${username}/entries/${id}`, {
+    cache: "no-store",
+  });
 
   const data = await res.json().catch(() => ({}));
 
