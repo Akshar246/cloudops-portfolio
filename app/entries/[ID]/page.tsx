@@ -67,9 +67,11 @@ export default function EntryDetailsPage() {
   const router = useRouter();
   const params = useParams();
 
-  // Be defensive: useParams can be string | string[]
+  // ✅ FIX: support both [id] and [ID] folder names (and string[])
   const id = useMemo(() => {
-    const raw = (params as any)?.id;
+    const p: any = params || {};
+    const raw = p.id ?? p.ID; // <-- key fix
+
     if (Array.isArray(raw)) return raw[0];
     return raw as string | undefined;
   }, [params]);
@@ -90,12 +92,13 @@ export default function EntryDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // (NEW) fetch your own email to generate your public profile link
+  // fetch your own email to generate your public profile link
   const [meEmail, setMeEmail] = useState<string>("");
 
-  const publicLabel = useMemo(() => {
-    return visibility === "public" ? "Public" : "Private";
-  }, [visibility]);
+  const publicLabel = useMemo(
+    () => (visibility === "public" ? "Public" : "Private"),
+    [visibility]
+  );
 
   const publicProfileLink = useMemo(() => {
     const prefix = emailPrefix(meEmail);
@@ -444,16 +447,12 @@ export default function EntryDetailsPage() {
 
             {/* Proofs */}
             <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-sm font-semibold text-gray-900">
-                    Proofs
-                  </h2>
-                  <p className="mt-1 text-xs text-gray-600">
-                    Upload screenshots or PDFs as proof. Files go to S3 and link
-                    to this entry.
-                  </p>
-                </div>
+              <div>
+                <h2 className="text-sm font-semibold text-gray-900">Proofs</h2>
+                <p className="mt-1 text-xs text-gray-600">
+                  Upload screenshots or PDFs as proof. Files go to S3 and link to
+                  this entry.
+                </p>
               </div>
 
               <div className="mt-4 rounded-2xl border border-gray-200 bg-gray-50 p-4">
@@ -501,9 +500,7 @@ export default function EntryDetailsPage() {
                               Open
                             </a>
                           ) : (
-                            <span className="text-xs text-gray-400">
-                              No URL
-                            </span>
+                            <span className="text-xs text-gray-400">No URL</span>
                           )}
                         </div>
                       );
