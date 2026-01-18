@@ -1,69 +1,69 @@
-import { NextResponse } from "next/server";
-import Entry from "@/models/Entry";
+import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { getUserFromToken } from "@/lib/auth";
+import Entry from "@/models/Entry";
+import { getAuthUserId } from "@/lib/getAuthUser";
+import mongoose from "mongoose";
+
+/**
+ * ENTRY PROOFS API (Owner-only)
+ *
+ * What this file does:
+ * - POST: Attach an uploaded proof (S3 key + metadata) to an entry (owner-only)
+ *
+ * Why this matters:
+ * - Keeps S3 upload separate from DB write
+ * - Ensures only the entry owner can attach proofs
+ * - Stores metadata so UI can show file name/size/type
+ */
 
 export async function POST(
-  req: Request,
-  context: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getUserFromToken();
-    if (!user) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    const userId = await getAuthUserId();
+
+    const { id } = await context.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ message: "Invalid entry id" }, { status: 400 });
     }
 
-    const { id: entryId } = await context.params;
-
     const body = await req.json();
+    const { key, contentType, size, originalName } = body || {};
 
-    const { key, contentType, size, originalName } = body as {
-      key: string;
-      contentType: string;
-      size: number;
-      originalName: string;
-    };
-
-    if (!key || !contentType || !size || !originalName) {
+    if (!key || !originalName || !contentType) {
       return NextResponse.json(
-        { message: "Missing proof fields" },
+        { message: "key, originalName, and contentType are required" },
         { status: 400 }
       );
     }
 
     await connectDB();
 
-    const entry = await Entry.findOne({
-      _id: entryId,
-      ownerId: user._id,
-    });
-
+    const entry = await Entry.findOne({ _id: id, ownerId: userId });
     if (!entry) {
-      return NextResponse.json(
-        { message: "Entry not found or forbidden" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "Entry not found" }, { status: 404 });
     }
 
+    entry.proofs = Array.isArray(entry.proofs) ? entry.proofs : [];
     entry.proofs.push({
       key,
-      contentType,
-      size,
       originalName,
+      contentType,
+      size: Number(size) || 0,
       uploadedAt: new Date(),
     });
 
     await entry.save();
 
     return NextResponse.json(
-      { message: "Proof attached successfully", entry },
+      { message: "Proof attached successfully" },
       { status: 200 }
     );
-  } catch (error) {
-    console.error("Attach proof error:", error);
-    return NextResponse.json(
-      { message: "Something went wrong" },
-      { status: 500 }
-    );
+  } catch (error: any) {
+    const msg = error?.message || "Not authenticated";
+    const status = msg === "Not authenticated" ? 401 : 500;
+    return NextResponse.json({ message: msg }, { status });
   }
 }
