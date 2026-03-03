@@ -30,7 +30,7 @@ export async function GET() {
     const handle = user.email.split("@")[0];
 
     return NextResponse.json({ handle }, { status: 200 });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 }

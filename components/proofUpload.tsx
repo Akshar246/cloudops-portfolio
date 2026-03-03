@@ -93,8 +93,9 @@ export default function ProofUpload({ entryId }: Props) {
 
       // IMPORTANT: refresh the current page (Server Components re-fetch)
       router.refresh();
-    } catch (err: any) {
-      setMsg(`❌ ${err?.message || "Upload failed"}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Upload failed";
+      setMsg(`❌ ${message}`);
     } finally {
       setLoading(false);
     }

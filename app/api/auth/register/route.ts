@@ -6,7 +6,9 @@ import { hashPassword, createToken } from "@/lib/auth";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { email, password } = body;
+    const rawEmail = String(body?.email || "");
+    const password = String(body?.password || "");
+    const email = rawEmail.trim().toLowerCase();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -27,10 +29,7 @@ export async function POST(req: Request) {
 
     const hashedPassword = await hashPassword(password);
 
-    const user = await User.create({
-      email,
-      password: hashedPassword,
-    });
+    const user = await User.create({ email, password: hashedPassword });
 
     const token = createToken(user._id.toString());
 
@@ -49,7 +48,15 @@ export async function POST(req: Request) {
     });
 
     return response;
-  } catch (error) {
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code?: number }).code === 11000
+    ) {
+      return NextResponse.json({ message: "User already exists" }, { status: 409 });
+    }
     console.error("Register error:", error);
     return NextResponse.json(
       { message: "Something went wrong" },

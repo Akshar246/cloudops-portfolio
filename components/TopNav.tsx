@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 type AuthState =
   | { status: "loading" }
   | { status: "loggedOut" }
-  | { status: "loggedIn"; username?: string };
+  | { status: "loggedIn"; handle?: string };
 
 export default function TopNav() {
   const [auth, setAuth] = useState<AuthState>({ status: "loading" });
@@ -31,7 +31,7 @@ export default function TopNav() {
         }
 
         const data = await res.json().catch(() => ({}));
-        setAuth({ status: "loggedIn", username: data?.user?.username });
+        setAuth({ status: "loggedIn", handle: data?.user?.handle });
       } catch {
         if (!alive) return;
         setAuth({ status: "loggedOut" });
@@ -89,9 +89,9 @@ export default function TopNav() {
         Dashboard
       </Link>
 
-      {auth.username && (
+      {auth.handle && (
         <Link
-          href={`/public/${auth.username}`}
+          href={`/public/${auth.handle}`}
           className="rounded-2xl px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
         >
           Public Profile

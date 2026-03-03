@@ -3,6 +3,9 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3, S3_BUCKET } from "@/lib/s3";
 import { getUserFromToken } from "@/lib/auth";
+import { connectDB } from "@/lib/db";
+import Entry from "@/models/Entry";
+import mongoose from "mongoose";
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
 const MAX_PDF_BYTES = 25 * 1024 * 1024; // 25MB
@@ -30,6 +33,9 @@ export async function POST(req: Request) {
     if (!fileName || !fileType || !size || !entryId) {
       return NextResponse.json({ message: "Missing fields" }, { status: 400 });
     }
+    if (!mongoose.Types.ObjectId.isValid(entryId)) {
+      return NextResponse.json({ message: "Invalid entry id" }, { status: 400 });
+    }
 
     const isImage = fileType.startsWith("image/");
     const isPdf = fileType === "application/pdf";
@@ -54,6 +60,12 @@ export async function POST(req: Request) {
       );
     }
 
+    await connectDB();
+    const entry = await Entry.findOne({ _id: entryId, ownerId: user._id }).select("_id");
+    if (!entry) {
+      return NextResponse.json({ message: "Entry not found" }, { status: 404 });
+    }
+
     const safeName = sanitizeFileName(fileName);
 
     // proofs/<userId>/<entryId>/timestamp-filename
@@ -69,7 +81,7 @@ export async function POST(req: Request) {
     const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 60 });
 
     return NextResponse.json({ uploadUrl, key }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Presign error:", error);
     return NextResponse.json(
       { message: "Something went wrong" },

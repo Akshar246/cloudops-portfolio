@@ -46,6 +46,14 @@ export async function POST(
       return NextResponse.json({ message: "Entry not found" }, { status: 404 });
     }
 
+    const expectedPrefix = `proofs/${userId}/${id}/`;
+    if (typeof key !== "string" || !key.startsWith(expectedPrefix)) {
+      return NextResponse.json(
+        { message: "Invalid proof key for this entry" },
+        { status: 400 }
+      );
+    }
+
     entry.proofs = Array.isArray(entry.proofs) ? entry.proofs : [];
     entry.proofs.push({
       key,
@@ -61,8 +69,8 @@ export async function POST(
       { message: "Proof attached successfully" },
       { status: 200 }
     );
-  } catch (error: any) {
-    const msg = error?.message || "Not authenticated";
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Not authenticated";
     const status = msg === "Not authenticated" ? 401 : 500;
     return NextResponse.json({ message: msg }, { status });
   }

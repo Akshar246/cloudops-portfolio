@@ -96,19 +96,19 @@ export default function Home() {
             <div className="mt-5 grid gap-3">
               {[
                 {
-                  title: "AWS SimuLearn — S3 Reliability Lab",
+                  title: "AWS SimuLearn - S3 Reliability Lab",
                   type: "AWS Lab",
                   date: "Jan 13, 2026",
                 },
                 {
                   title:
-                    "DSA — Insertion Sort (Java) with Implementation Notes",
+                    "DSA - Insertion Sort (Java) with Implementation Notes",
                   type: "DSA",
                   date: "Jan 12, 2026",
                 },
                 {
                   title:
-                    "GlobeTalk — Real-Time Language Translation Web Application",
+                    "GlobeTalk - Real-Time Language Translation Web Application",
                   type: "Project",
                   date: "Dec 31, 2025",
                 },

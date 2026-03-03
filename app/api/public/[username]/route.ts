@@ -13,6 +13,10 @@ type Ctx = {
   }>;
 };
 
+function escapeRegex(input: string) {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export async function GET(_req: Request, ctx: Ctx) {
   try {
     const { username } = await ctx.params;
@@ -25,7 +29,7 @@ export async function GET(_req: Request, ctx: Ctx) {
      *   username = "sak2"
      *   matches: sak2@gmail.com
      */
-    const emailRegex = new RegExp(`^${username}@`, "i");
+    const emailRegex = new RegExp(`^${escapeRegex(username)}@`, "i");
 
     const user = await User.findOne({ email: emailRegex }).lean();
 
@@ -55,7 +59,7 @@ export async function GET(_req: Request, ctx: Ctx) {
       },
       { status: 200 }
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { message: "Failed to load public profile" },
       { status: 500 }

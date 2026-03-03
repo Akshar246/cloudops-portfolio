@@ -58,7 +58,7 @@ export async function getUserFromToken() {
     const user = await User.findById(decoded.userId).select("-password");
 
     return user;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

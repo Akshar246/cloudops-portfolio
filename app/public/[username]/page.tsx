@@ -3,6 +3,11 @@ import { headers } from "next/headers";
 
 /**
  * PUBLIC PROFILE PAGE (Recruiter Header + Polished UX)
+ *
+ * Key improvements in this version:
+ * - Robust base URL detection (prevents "Invalid URL" / "Failed to parse URL" on Vercel)
+ * - More recruiter-friendly top header (less "system/internal", more portfolio landing)
+ * - Keeps your filters/search/cards unchanged
  */
 
 type EntryType = "AWS Lab" | "Project" | "DSA" | "Certificate";
@@ -58,9 +63,24 @@ function TypeBadge({ type }: { type: EntryType }) {
 }
 
 function safeDate(s: string) {
-  // keep it simple + readable (YYYY-MM-DD)
   if (!s) return "—";
   return s.slice(0, 10);
+}
+
+/** Build an absolute base URL that works on Vercel + locally. */
+async function getBaseUrl() {
+  const h = await headers();
+
+  // Vercel/Proxies usually set these:
+  const proto = h.get("x-forwarded-proto") || "http";
+  const host = h.get("x-forwarded-host") || h.get("host");
+
+  // If host is missing for some reason, fall back safely.
+  // You can optionally set NEXT_PUBLIC_SITE_URL in Vercel later.
+  const fallback =
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+  return host ? `${proto}://${host}` : fallback;
 }
 
 export default async function PublicProfilePage({
@@ -75,13 +95,11 @@ export default async function PublicProfilePage({
   const q = (sp.q || "").trim();
   const typeParam = (sp.type || "all").toLowerCase(); // all | aws lab | project | dsa | certificate
 
-  // Build base URL dynamically (works locally + Vercel)
-  const h = await headers();
-  const host = h.get("host");
-  const proto = h.get("x-forwarded-proto") || "http";
-  const base = host ? `${proto}://${host}` : "";
+  const base = await getBaseUrl();
 
-  const res = await fetch(`${base}/api/public/${username}`, { cache: "no-store" });
+  const res = await fetch(`${base}/api/public/${username}`, {
+    cache: "no-store",
+  });
   const data = await res.json().catch(() => ({}));
   const entries: PublicEntry[] = data.entries || [];
   const errorMessage = !res.ok ? data?.message || "Failed to load profile" : null;
@@ -107,7 +125,9 @@ export default async function PublicProfilePage({
   });
 
   // Default sort: newest first (by date string)
-  const sorted = [...filtered].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  const sorted = [...filtered].sort((a, b) =>
+    (b.date || "").localeCompare(a.date || "")
+  );
 
   function makeHref(nextType: string, nextQ: string) {
     const qs = new URLSearchParams();
@@ -120,18 +140,18 @@ export default async function PublicProfilePage({
   const isActive = (t: string) =>
     typeParam === "all" ? t === "all" : t === typeParam;
 
-  //Edit these once and forget (your real header)
+  // Edit these once and forget (your real header)
   const PROFILE = {
     name: "Akshar Chanchlani",
     headline: "Cloud / DevOps Learner • AWS Hands-on Portfolio",
     location: "London / India",
     about:
-      "I build proof-driven cloud projects and learning logs (AWS labs, certifications, DSA, and real apps) with clean engineering practices and security-first mindset.",
+      "I build proof-driven cloud projects and learning logs (AWS labs, certifications, DSA, and real apps) with clean engineering practices and a security-first mindset.",
     skills: ["AWS", "IAM", "S3", "VPC", "CloudWatch", "Next.js", "MongoDB", "JWT"],
     links: {
       linkedin: "https://linkedin.com/in/akshar-chanchlani",
       github: "https://github.com/Akshar246",
-      resume: "/CV_JPM.pdf", 
+      resume: "/CV_JPM.pdf",
     },
   };
 
@@ -140,15 +160,15 @@ export default async function PublicProfilePage({
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-10">
       <div className="mx-auto max-w-6xl">
-        {/* Top Header */}
+        {/* Top Header (more recruiter-friendly) */}
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
-            <p className="text-xs text-slate-500">Public Profile</p>
+            <p className="text-xs text-slate-500">Akshar’s CloudOps Portfolio</p>
             <h1 className="text-2xl font-bold text-slate-900">
-              {username} - Public Portfolio
+              Public Profile
             </h1>
             <p className="mt-1 text-sm text-slate-600">
-              Showing only <span className="font-medium">public</span> entries.
+              Verified learning logs & projects (only <span className="font-medium">public</span> entries).
             </p>
           </div>
 
@@ -159,16 +179,18 @@ export default async function PublicProfilePage({
             >
               Home
             </Link>
-            <Link
-              href="/dashboard"
+            <a
+              href={PROFILE.links.resume}
+              target="_blank"
+              rel="noreferrer"
               className="rounded-xl bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800"
             >
-              Dashboard
-            </Link>
+              View Resume
+            </a>
           </div>
         </div>
 
-        {/* ✅ Recruiter Header (Hero) */}
+        {/* Recruiter Header (Hero) */}
         <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
           <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div className="max-w-3xl">
@@ -210,7 +232,7 @@ export default async function PublicProfilePage({
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Resume
+                  Resume (PDF)
                 </a>
               </div>
 
@@ -252,16 +274,10 @@ export default async function PublicProfilePage({
                 <TabButton href={makeHref("all", q)} active={isActive("all")}>
                   All
                 </TabButton>
-                <TabButton
-                  href={makeHref("aws lab", q)}
-                  active={isActive("aws lab")}
-                >
+                <TabButton href={makeHref("aws lab", q)} active={isActive("aws lab")}>
                   AWS Labs
                 </TabButton>
-                <TabButton
-                  href={makeHref("project", q)}
-                  active={isActive("project")}
-                >
+                <TabButton href={makeHref("project", q)} active={isActive("project")}>
                   Projects
                 </TabButton>
                 <TabButton href={makeHref("dsa", q)} active={isActive("dsa")}>

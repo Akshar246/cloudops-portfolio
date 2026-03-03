@@ -6,6 +6,12 @@ import { getAuthUserId } from "@/lib/getAuthUser";
 
 type Ctx = { params: Promise<{ id: string }> };
 
+function isValidISODate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const d = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
+
 function normalizeTags(tags: unknown): string[] {
   if (Array.isArray(tags)) {
     return tags
@@ -43,8 +49,8 @@ export async function GET(_req: Request, ctx: Ctx) {
     }
 
     return NextResponse.json({ entry }, { status: 200 });
-  } catch (error: any) {
-    const msg = error?.message || "Not authenticated";
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Not authenticated";
     const status = msg === "Not authenticated" ? 401 : 500;
     return NextResponse.json({ message: msg }, { status });
   }
@@ -76,6 +82,12 @@ export async function PUT(req: Request, ctx: Ctx) {
         { status: 400 }
       );
     }
+    if (!isValidISODate(date)) {
+      return NextResponse.json(
+        { message: "date must be in YYYY-MM-DD format" },
+        { status: 400 }
+      );
+    }
 
     await connectDB();
 
@@ -90,8 +102,8 @@ export async function PUT(req: Request, ctx: Ctx) {
     }
 
     return NextResponse.json({ entry: updated }, { status: 200 });
-  } catch (error: any) {
-    const msg = error?.message || "Not authenticated";
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Not authenticated";
     const status = msg === "Not authenticated" ? 401 : 500;
     return NextResponse.json({ message: msg }, { status });
   }
@@ -117,8 +129,8 @@ export async function DELETE(_req: Request, ctx: Ctx) {
     }
 
     return NextResponse.json({ message: "Entry deleted" }, { status: 200 });
-  } catch (error: any) {
-    const msg = error?.message || "Not authenticated";
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Not authenticated";
     const status = msg === "Not authenticated" ? 401 : 500;
     return NextResponse.json({ message: msg }, { status });
   }

@@ -65,12 +65,11 @@ function emailPrefix(email: string) {
 
 export default function EntryDetailsPage() {
   const router = useRouter();
-  const params = useParams();
+  const params = useParams<{ id?: string | string[]; ID?: string | string[] }>();
 
   // ✅ FIX: support both [id] and [ID] folder names (and string[])
   const id = useMemo(() => {
-    const p: any = params || {};
-    const raw = p.id ?? p.ID; // <-- key fix
+    const raw = params?.id ?? params?.ID; // <-- key fix
 
     if (Array.isArray(raw)) return raw[0];
     return raw as string | undefined;

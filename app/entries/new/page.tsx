@@ -152,10 +152,10 @@ export default function NewEntryPage() {
                   Date
                 </label>
                 <input
+                  type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-                  placeholder="YYYY-MM-DD"
                 />
               </div>
             </div>

@@ -8,6 +8,20 @@ import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 type Ctx = { params: Promise<{ username: string; id: string }> };
+type ProofDoc = {
+  key?: string;
+  originalName?: string;
+  contentType?: string;
+  size?: number;
+  uploadedAt?: string | Date | null;
+};
+type EntryDoc = {
+  proofs?: ProofDoc[];
+};
+
+function escapeRegex(input: string) {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION!,
@@ -31,7 +45,7 @@ export async function GET(_req: Request, ctx: Ctx) {
     await connectDB();
 
     // Email-prefix model: /public/sak246203 => user email starts with "sak246203@"
-    const emailRegex = new RegExp(`^${username}@`, "i");
+    const emailRegex = new RegExp(`^${escapeRegex(username)}@`, "i");
     const user = await User.findOne({ email: emailRegex }).lean();
 
     if (!user) {
@@ -55,13 +69,14 @@ export async function GET(_req: Request, ctx: Ctx) {
     }
 
     const bucket = process.env.S3_BUCKET_NAME!;
-    const proofs = Array.isArray((entry as any).proofs)
-      ? (entry as any).proofs
+    const entryDoc = entry as EntryDoc;
+    const proofs = Array.isArray(entryDoc.proofs)
+      ? entryDoc.proofs
       : [];
 
     // Presign each proof (10 minutes)
     const proofUrls = await Promise.all(
-      proofs.map(async (p: any) => {
+      proofs.map(async (p) => {
         const key = p?.key;
         if (!key) return null;
 
@@ -87,8 +102,9 @@ export async function GET(_req: Request, ctx: Ctx) {
       { entry, proofUrls: proofUrls.filter(Boolean) },
       { status: 200 }
     );
-  } catch (err: any) {
-    const msg = err?.message || "Failed to load public entry";
+  } catch (err: unknown) {
+    const msg =
+      err instanceof Error ? err.message : "Failed to load public entry";
     return NextResponse.json({ message: msg }, { status: 500 });
   }
 }

@@ -20,7 +20,7 @@ export async function GET() {
     const payload = verifyToken(token); // { userId }
     await connectDB();
 
-    const user = await User.findById(payload.userId).select("_id email username");
+    const user = await User.findById(payload.userId).select("_id email");
     if (!user) {
       return NextResponse.json(
         { message: "User not found" },
@@ -28,11 +28,12 @@ export async function GET() {
       );
     }
 
+    const handle = String(user.email).split("@")[0] || "";
     return NextResponse.json(
-      { user: { _id: user._id, email: user.email, username: user.username } },
+      { user: { _id: user._id, email: user.email, handle } },
       { status: 200, headers: { "Cache-Control": "no-store" } }
     );
-  } catch (e) {
+  } catch {
     return NextResponse.json(
       { message: "Not authenticated" },
       { status: 401, headers: { "Cache-Control": "no-store" } }
