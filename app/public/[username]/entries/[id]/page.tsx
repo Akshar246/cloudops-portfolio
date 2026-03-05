@@ -17,6 +17,11 @@ type PublicEntry = {
   type: EntryType;
   title: string;
   description: string;
+  problem?: string;
+  approach?: string;
+  outcome?: string;
+  securityDecisions?: string;
+  whatILearned?: string;
   tags: string[];
   visibility: "public" | "private";
   date: string;
@@ -122,6 +127,51 @@ export default async function PublicEntryDetailsPage({
                 {entry.description}
               </p>
             </section>
+
+            {entry.problem ? (
+              <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h2 className="text-sm font-semibold text-gray-900">Problem</h2>
+                <p className="mt-2 whitespace-pre-wrap text-sm text-gray-700">
+                  {entry.problem}
+                </p>
+              </section>
+            ) : null}
+
+            {entry.approach ? (
+              <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h2 className="text-sm font-semibold text-gray-900">Approach</h2>
+                <p className="mt-2 whitespace-pre-wrap text-sm text-gray-700">
+                  {entry.approach}
+                </p>
+              </section>
+            ) : null}
+
+            {entry.outcome ? (
+              <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h2 className="text-sm font-semibold text-gray-900">Outcome</h2>
+                <p className="mt-2 whitespace-pre-wrap text-sm text-gray-700">
+                  {entry.outcome}
+                </p>
+              </section>
+            ) : null}
+
+            {entry.securityDecisions ? (
+              <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h2 className="text-sm font-semibold text-gray-900">Security Decisions</h2>
+                <p className="mt-2 whitespace-pre-wrap text-sm text-gray-700">
+                  {entry.securityDecisions}
+                </p>
+              </section>
+            ) : null}
+
+            {entry.whatILearned ? (
+              <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h2 className="text-sm font-semibold text-gray-900">What I Learned</h2>
+                <p className="mt-2 whitespace-pre-wrap text-sm text-gray-700">
+                  {entry.whatILearned}
+                </p>
+              </section>
+            ) : null}
 
             <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-900">Proofs</h2>

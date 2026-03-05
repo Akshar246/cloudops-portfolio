@@ -16,6 +16,11 @@ export default function NewEntryPage() {
   const [type, setType] = useState<EntryType>("AWS Lab");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [problem, setProblem] = useState("");
+  const [approach, setApproach] = useState("");
+  const [outcome, setOutcome] = useState("");
+  const [securityDecisions, setSecurityDecisions] = useState("");
+  const [whatILearned, setWhatILearned] = useState("");
   const [tags, setTags] = useState("");
   const [visibility, setVisibility] = useState<Visibility>("private");
   const [date, setDate] = useState("");
@@ -40,6 +45,11 @@ export default function NewEntryPage() {
           type,
           title,
           description,
+          problem,
+          approach,
+          outcome,
+          securityDecisions,
+          whatILearned,
           tags, // API will split commas
           visibility,
           date,
@@ -117,6 +127,76 @@ export default function NewEntryPage() {
                 className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                 rows={5}
                 placeholder="What you did, what you learned, and why it matters."
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Problem (optional)
+              </label>
+              <textarea
+                value={problem}
+                onChange={(e) => setProblem(e.target.value)}
+                className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                rows={3}
+                placeholder="What challenge were you solving?"
+                maxLength={2500}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Approach (optional)
+              </label>
+              <textarea
+                value={approach}
+                onChange={(e) => setApproach(e.target.value)}
+                className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                rows={3}
+                placeholder="How did you design and implement the solution?"
+                maxLength={2500}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Outcome (optional)
+              </label>
+              <textarea
+                value={outcome}
+                onChange={(e) => setOutcome(e.target.value)}
+                className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                rows={3}
+                placeholder="What result, impact, or measurable improvement did you achieve?"
+                maxLength={2500}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Security Decisions (optional)
+              </label>
+              <textarea
+                value={securityDecisions}
+                onChange={(e) => setSecurityDecisions(e.target.value)}
+                className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                rows={3}
+                placeholder="Example: httpOnly JWT cookies, owner-only API checks, S3 key prefix validation."
+                maxLength={2000}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                What I Learned (optional)
+              </label>
+              <textarea
+                value={whatILearned}
+                onChange={(e) => setWhatILearned(e.target.value)}
+                className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                rows={4}
+                placeholder="Key takeaways, mistakes you fixed, and how this improved your cloud/devops thinking."
+                maxLength={2000}
               />
             </div>
 

@@ -13,10 +13,54 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
 export const metadata: Metadata = {
-  title: "CloudOps Portfolio Hub",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Akshar Chanchlani | CloudOps Portfolio",
+    template: "%s | Akshar Chanchlani",
+  },
   description:
-    "Proof-driven portfolio for AWS labs, projects, and learning logs.",
+    "Cloud/DevOps portfolio featuring AWS labs, projects, certifications, and proof-based case studies.",
+  keywords: [
+    "Cloud Engineer",
+    "DevOps",
+    "AWS",
+    "Next.js",
+    "MongoDB",
+    "S3",
+    "Portfolio",
+  ],
+  authors: [{ name: "Akshar Chanchlani" }],
+  creator: "Akshar Chanchlani",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_GB",
+    url: "/",
+    siteName: "CloudOps Portfolio",
+    title: "Akshar Chanchlani | CloudOps Portfolio",
+    description:
+      "Production-style cloud portfolio with AWS projects, security decisions, and proof artifacts.",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Akshar Chanchlani CloudOps Portfolio",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Akshar Chanchlani | CloudOps Portfolio",
+    description:
+      "AWS labs, projects, certifications, and case-study based cloud engineering work.",
+    images: ["/twitter-image"],
+  },
 };
 
 export default function RootLayout({

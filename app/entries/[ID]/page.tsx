@@ -27,6 +27,11 @@ type Entry = {
   type: EntryType;
   title: string;
   description: string;
+  problem?: string;
+  approach?: string;
+  outcome?: string;
+  securityDecisions?: string;
+  whatILearned?: string;
   tags: string[];
   visibility: Visibility;
   date: string;
@@ -80,6 +85,11 @@ export default function EntryDetailsPage() {
   const [type, setType] = useState<EntryType>("AWS Lab");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [problem, setProblem] = useState("");
+  const [approach, setApproach] = useState("");
+  const [outcome, setOutcome] = useState("");
+  const [securityDecisions, setSecurityDecisions] = useState("");
+  const [whatILearned, setWhatILearned] = useState("");
   const [tags, setTags] = useState("");
   const [visibility, setVisibility] = useState<Visibility>("private");
   const [date, setDate] = useState("");
@@ -146,6 +156,11 @@ export default function EntryDetailsPage() {
         setType(e.type);
         setTitle(e.title);
         setDescription(e.description);
+        setProblem(e.problem || "");
+        setApproach(e.approach || "");
+        setOutcome(e.outcome || "");
+        setSecurityDecisions(e.securityDecisions || "");
+        setWhatILearned(e.whatILearned || "");
         setTags((e.tags || []).join(", "));
         setVisibility(e.visibility);
         setDate((e.date || "").slice(0, 10));
@@ -178,6 +193,11 @@ export default function EntryDetailsPage() {
           type,
           title: title.trim(),
           description: description.trim(),
+          problem: problem.trim(),
+          approach: approach.trim(),
+          outcome: outcome.trim(),
+          securityDecisions: securityDecisions.trim(),
+          whatILearned: whatILearned.trim(),
           tags, // API will split commas
           visibility,
           date,
@@ -394,6 +414,76 @@ export default function EntryDetailsPage() {
                     className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                     rows={7}
                     placeholder="What you did, what broke, what you fixed, what you learned..."
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Problem (optional)
+                  </label>
+                  <textarea
+                    value={problem}
+                    onChange={(e) => setProblem(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                    rows={3}
+                    placeholder="What challenge were you solving?"
+                    maxLength={2500}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Approach (optional)
+                  </label>
+                  <textarea
+                    value={approach}
+                    onChange={(e) => setApproach(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                    rows={3}
+                    placeholder="How did you design and implement the solution?"
+                    maxLength={2500}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Outcome (optional)
+                  </label>
+                  <textarea
+                    value={outcome}
+                    onChange={(e) => setOutcome(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                    rows={3}
+                    placeholder="What result or measurable impact did you achieve?"
+                    maxLength={2500}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Security Decisions (optional)
+                  </label>
+                  <textarea
+                    value={securityDecisions}
+                    onChange={(e) => setSecurityDecisions(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                    rows={3}
+                    placeholder="What security controls did you apply and why?"
+                    maxLength={2000}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    What I Learned (optional)
+                  </label>
+                  <textarea
+                    value={whatILearned}
+                    onChange={(e) => setWhatILearned(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                    rows={4}
+                    placeholder="Key takeaways, tradeoffs, and what you'd do differently next time."
+                    maxLength={2000}
                   />
                 </div>
 

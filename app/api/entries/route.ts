@@ -30,6 +30,18 @@ function normalizeTags(tags: unknown): string[] {
   return [];
 }
 
+function normalizeWhatILearned(value: unknown): string {
+  return String(value ?? "").trim().slice(0, 2000);
+}
+
+function normalizeCaseStudyField(value: unknown): string {
+  return String(value ?? "").trim().slice(0, 2500);
+}
+
+function normalizeSecurityDecisions(value: unknown): string {
+  return String(value ?? "").trim().slice(0, 2000);
+}
+
 export async function GET() {
   try {
     const userId = await getAuthUserId();
@@ -54,6 +66,11 @@ export async function POST(req: Request) {
     const type = String(body?.type || "").trim();
     const title = String(body?.title || "").trim();
     const description = String(body?.description || "").trim();
+    const problem = normalizeCaseStudyField(body?.problem);
+    const approach = normalizeCaseStudyField(body?.approach);
+    const outcome = normalizeCaseStudyField(body?.outcome);
+    const securityDecisions = normalizeSecurityDecisions(body?.securityDecisions);
+    const whatILearned = normalizeWhatILearned(body?.whatILearned);
     const date = String(body?.date || "").trim();
     const visibility = body?.visibility === "public" ? "public" : "private";
     const tags = normalizeTags(body?.tags);
@@ -78,6 +95,11 @@ export async function POST(req: Request) {
       type,
       title,
       description,
+      problem,
+      approach,
+      outcome,
+      securityDecisions,
+      whatILearned,
       tags,
       visibility,
       date,

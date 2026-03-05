@@ -1,0 +1,32 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#1E293B"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#38BDF8"/>
+      <stop offset="1" stop-color="#22C55E"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1040" cy="120" r="220" fill="#0EA5E9" fill-opacity="0.12"/>
+  <circle cx="160" cy="570" r="280" fill="#22C55E" fill-opacity="0.1"/>
+
+  <rect x="70" y="80" width="180" height="36" rx="18" fill="#0B1220" stroke="#334155"/>
+  <text x="95" y="103" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="16" font-weight="600">CLOUDOPS PORTFOLIO</text>
+
+  <text x="70" y="230" fill="white" font-family="Arial, sans-serif" font-size="72" font-weight="700">Akshar Chanchlani</text>
+  <text x="70" y="295" fill="#BAE6FD" font-family="Arial, sans-serif" font-size="40" font-weight="600">Cloud / DevOps Engineer</text>
+
+  <text x="70" y="365" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="28">AWS • Next.js • MongoDB • JWT • S3</text>
+  <text x="70" y="410" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="28">Projects, Certifications, Proof-Based Case Studies</text>
+
+  <rect x="70" y="470" width="1060" height="1" fill="#334155"/>
+
+  <g>
+    <circle cx="100" cy="530" r="10" fill="url(#accent)"/>
+    <text x="125" y="538" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="22">Production-style architecture and security-first delivery</text>
+  </g>
+</svg>

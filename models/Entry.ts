@@ -17,6 +17,11 @@ export interface IEntry {
   type: "AWS Lab" | "Project" | "DSA" | "Certificate";
   title: string;
   description: string;
+  problem: string;
+  approach: string;
+  outcome: string;
+  securityDecisions: string;
+  whatILearned: string;
   tags: string[];
   visibility: "private" | "public";
   date: string; // YYYY-MM-DD
@@ -35,6 +40,11 @@ const EntrySchema = new Schema<IEntry>(
 
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true },
+    problem: { type: String, default: "", trim: true },
+    approach: { type: String, default: "", trim: true },
+    outcome: { type: String, default: "", trim: true },
+    securityDecisions: { type: String, default: "", trim: true },
+    whatILearned: { type: String, default: "", trim: true },
 
     tags: { type: [String], default: [] },
 
